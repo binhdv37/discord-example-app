@@ -58,6 +58,27 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       });
     }
 
+    if (name === 'weather') {
+      // trigger n8n weather flow
+      const webhook = 'https://n8n.binhregistry.fun/webhook/3b9f8352-1ca7-4f58-b34b-81b238cce817';
+      await fetch(webhook);
+
+      // Send a message into the channel where command was triggered from
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          flags: InteractionResponseFlags.IS_COMPONENTS_V2,
+          components: [
+            {
+              type: MessageComponentTypes.TEXT_DISPLAY,
+              // Fetches a random emoji to send from a helper function
+              content: `Gathering weather information ${getRandomEmoji()}!`
+            }
+          ]
+        },
+      });
+    }
+
     console.error(`unknown command: ${name}`);
     return res.status(400).json({ error: 'unknown command' });
   }
